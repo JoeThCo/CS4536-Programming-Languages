@@ -1,5 +1,5 @@
 pub mod asgn1 {
-    use std::unimplemented;
+    //use std::unimplemented;
 
     /**  Q1:
      * TASK:
@@ -17,7 +17,7 @@ pub mod asgn1 {
      * Assume that a third element exists.
      * Staff solution length: 1 line of code. */
     pub fn get_third(arg: &[i64]) -> i64 {
-        unimplemented!();
+        arg[2]
     }
 
     /** Q2.B
@@ -27,7 +27,7 @@ pub mod asgn1 {
      * x, x^2, x^3 in that order.
      * Staff solution length: 1 line of code. */
     pub fn powers(arg: i64) -> Vec<i64> {
-        unimplemented!();
+        vec![arg, i64::pow(arg, 2), i64::pow(arg, 3)]
     }
 
     /** Q2.C:
@@ -37,7 +37,9 @@ pub mod asgn1 {
      * Modify it in-place, updating every array element x to x^2  
      * Staff solution length: 3 lines of code. */
     pub fn square_array(arg: &mut [i64]) {
-        unimplemented!();
+        for element in arg.iter_mut() {
+            *element = i64::pow(*element, 2);
+        }
     }
 
     /** Q3.A:  
@@ -48,7 +50,12 @@ pub mod asgn1 {
      * Use a for loop to reverse the 10-element array in-place.
      * Staff solution length: 5 lines of code. */
     pub fn reverse_array(arg: &mut [i64]) {
-        unimplemented!();
+        let length = arg.len();
+        for i in 0..length / 2 {
+            let temp = arg[i];
+            arg[i] = arg[length - 1 - i];
+            arg[length - 1 - i] = temp
+        }
     }
 
     /** Q3.B:  
@@ -58,7 +65,15 @@ pub mod asgn1 {
      * Return a sum of zero elements when n < 1.
      * Staff solution length: 5 lines of code.  */
     pub fn sum_to_index(n: i64) -> i64 {
-        unimplemented!();
+        if n < 1 {
+            return 0;
+        }
+
+        let mut sum = 0;
+        for i in 1..=n {
+            sum += i64::pow(i, 2);
+        }
+        sum
     }
 
     /** Q3.C:  
@@ -71,7 +86,14 @@ pub mod asgn1 {
      * Staff solution length: 7 lines of code.  
      */
     pub fn sum_until_zero(arg: &[i64]) -> i64 {
-        unimplemented!();
+        let mut sum = 0;
+        for element in arg {
+            if *element == 0 {
+                return sum;
+            }
+            sum += *element;
+        }
+        sum
     }
 
     /*
@@ -102,7 +124,21 @@ pub mod asgn1 {
      * Staff solution length: 11 lines of code.  
      */
     pub fn bsearch(t: Box<IntMap>, key: i64) -> i64 {
-        unimplemented!();
+        match *t {
+            IntMap::Empty => -1,
+            IntMap::Node(ref left, k, v, ref right) => {
+                //less = bsearch left
+                if key < k {
+                    bsearch(left.clone(), key)
+                //right = bsearch right
+                } else if key > k {
+                    bsearch(right.clone(), key)
+                //equals, return value
+                } else {
+                    v
+                }
+            }
+        }
     }
 
     /** Q4.B
@@ -115,6 +151,28 @@ pub mod asgn1 {
      * Staff solution length: 11 lines of code.  
      */
     pub fn insert(t: Box<IntMap>, key: i64, value: i64) -> Box<IntMap> {
-        unimplemented!();
+        //match = rust's switch statement
+        match *t {
+            //if empty, make new node with key and value
+            IntMap::Empty => Box::new(IntMap::Node(
+                Box::new(IntMap::Empty),
+                key,
+                value,
+                Box::new(IntMap::Empty),
+            )),
+            //if not empty
+            IntMap::Node(left, k, v, right) => {
+                //less = recursive left insert
+                if key < k {
+                    Box::new(IntMap::Node(insert(left, key, value), k, v, right))
+                //greater = rescursive right insert
+                } else if key > k {
+                    Box::new(IntMap::Node(left, k, v, insert(right, key, value)))
+                    //match on tree, update value
+                } else {
+                    Box::new(IntMap::Node(left, k, value, right))
+                }
+            }
+        }
     }
 }

@@ -1,2 +1,4 @@
 
 HW 1/joe_colley_hw_one/target/
+*.o
+*.bin
