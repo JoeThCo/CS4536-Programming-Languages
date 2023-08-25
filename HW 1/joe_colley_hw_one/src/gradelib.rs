@@ -1,8 +1,8 @@
-pub mod gradelib{
+pub mod gradelib {
     use std::fs::File;
     use std::io::prelude::*;
     use std::path::Path;
-    
+
     pub fn grade_str(g: f64) -> String {
         format!("{{\"score\": {},\"output\":\"Grader ran successfully\",\"stdout_visibility\":\"visible\"}}", g)
     }
@@ -13,7 +13,7 @@ pub mod gradelib{
             Err(_) => panic!("file"),
             Ok(f) => f,
         };
-        match file.write_all(grade_str(g).as_bytes())  {
+        match file.write_all(grade_str(g).as_bytes()) {
             Err(_why) => panic!("couldn't write file"),
             Ok(_) => println!("wrote json file"),
         }
