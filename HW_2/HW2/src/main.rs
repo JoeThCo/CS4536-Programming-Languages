@@ -17,13 +17,17 @@ fn test_numeral(score: f64, input: String, out: Option<f64>) -> f64 {
         (Err(_), None) => return score,
         (Ok(f), None) => {
             println!(
-                "Expression test case expected not to parse but got: {}",
+                "Expression test case expected not to parse {} but got: {}",
+                input,
                 asgn2::expr_to_string(f)
             );
             return 0.0;
         }
         (Err(_), Some(f)) => {
-            println!("Expression test case did not parse but expected {}", f);
+            println!(
+                "Expression test case did not parse {} but expected {}",
+                input, f
+            );
             return 0.0;
         }
     }

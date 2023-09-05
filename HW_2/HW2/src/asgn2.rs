@@ -148,20 +148,9 @@ peg::parser! {
   /* Parse a single literal number.
     Staff solution length: 6 lines */
 pub rule numeral() -> Expr
-    = n:$("-"? ['0' | '1'..='9'] ['0'..='9']* ("." ['0'..='9']+)?)
-      {
-        if n.contains('.') {
-            Expr::Numeral(n.parse().unwrap())
-        } else if n.starts_with("-0.") {
-            Expr::Numeral(n.parse::<f64>().unwrap())
-        } else {
-            let trimmed = n.trim_start_matches('0');
-            if trimmed.is_empty() {
-                Expr::Numeral(0.0)
-            } else {
-                Expr::Numeral(trimmed.parse::<f64>().unwrap())
-            }
-        }
+    = n:$((['-'])? ['0'..='9']* ['.']? ['0'..='9']*)
+    {
+        Expr::Numeral(n.parse::<f64>().unwrap())
     }
 
   /* Implement a parser for (all the) expressions. You should define
