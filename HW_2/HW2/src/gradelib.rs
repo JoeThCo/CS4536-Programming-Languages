@@ -4,6 +4,7 @@ pub mod gradelib {
     use std::path::Path;
 
     pub fn grade_str(g: f64) -> String {
+        println!("\n\n\nScore: {} / 75\n\n\n", g);
         format!("{{\"score\": {},\"output\":\"Grader ran successfully\",\"stdout_visibility\":\"visible\"}}", g)
     }
 

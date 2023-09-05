@@ -141,6 +141,13 @@ pub fn main() {
     let r9 = test_id(1.0, "_8e".to_string(), None);
     let r10 = test_id(1.0, "-29".to_string(), None);
     let r_id = r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10;
+
+    if r_id == 10.0 {
+        println!("\nID Tests Passed!\n");
+    } else {
+        println!("\nID Score: {}\n", r_id);
+    }
+
     //numeral 10
     let r11 = test_numeral(1.0, "3".to_string(), Some(3.));
     let r12 = test_numeral(1.0, "-3".to_string(), Some(-3.));
@@ -153,6 +160,12 @@ pub fn main() {
     let r19 = test_numeral(1.0, "-9.".to_string(), None);
     let r20 = test_numeral(1.0, "9.".to_string(), None);
     let r_num = r11 + r12 + r13 + r14 + r15 + r16 + r17 + r18 + r19 + r20;
+
+    if r_num == 10.0 {
+        println!("\nNumerical Tests Passed!\n");
+    } else {
+        println!("\nNumerical Score: {}\n", r_num);
+    }
 
     //expr 35
     let r21 = test_expr(3.0, "xyzzy".to_string(), Some(ex::Id("xyzzy".to_string())));
@@ -349,6 +362,12 @@ pub fn main() {
         )),
     );
     let r_decl = r33 + r34a + r34b + r35 + r36 + r37 + r38 + r39;
+
+    if r_decl == 35.0 {
+        println!("\nExpressions Passed!\n")
+    } else {
+        println!("\nExpressions Score: {}\n", r_decl);
+    }
 
     let r = r_id + r_num + r_expr + r_decl;
     gradelib::gradelib::record_grade(r);

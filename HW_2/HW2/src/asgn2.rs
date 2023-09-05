@@ -129,15 +129,40 @@ peg::parser! {
   /* YOUR CODE: */
   /* Parse a single identifier (i.e., variable name)
      Staff solution length: 2 lines */
-  pub rule id() -> String = unimplemented_string()
+     //Length: Two
+     //First: a-z or A-Z
+     //Second: a-z or A-Z or 0 - 9 or "_"
+    pub rule id() -> String = s:$(['a'..='z' | 'A'..='Z'] ['a'..='z' | 'A'..='Z' | '0'..='9' | '_']*)
+    {
+        s.to_string()
+    }
+
  /* Parse a single variable. The cleanest solution uses id() as a helper.
     var() behaves just like id(), except with a different return type.
     Staff solution length: 1 lines */
-  pub rule var() -> Expr = unimplemented_expr()
+  pub rule var() -> Expr = name: id()
+  {
+    Expr::Id(name)
+  }
 
   /* Parse a single literal number.
     Staff solution length: 6 lines */
-  pub rule numeral() -> Expr = unimplemented_expr()
+pub rule numeral() -> Expr
+    = n:$("-"? ['0' | '1'..='9'] ['0'..='9']* ("." ['0'..='9']+)?)
+      {
+        if n.contains('.') {
+            Expr::Numeral(n.parse().unwrap())
+        } else if n.starts_with("-0.") {
+            Expr::Numeral(n.parse::<f64>().unwrap())
+        } else {
+            let trimmed = n.trim_start_matches('0');
+            if trimmed.is_empty() {
+                Expr::Numeral(0.0)
+            } else {
+                Expr::Numeral(trimmed.parse::<f64>().unwrap())
+            }
+        }
+    }
 
   /* Implement a parser for (all the) expressions. You should define
      and call your own helpers. See the precedence-climbing approach
