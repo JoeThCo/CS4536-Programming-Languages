@@ -140,28 +140,60 @@ peg::parser! {
  /* Parse a single variable. The cleanest solution uses id() as a helper.
     var() behaves just like id(), except with a different return type.
     Staff solution length: 1 lines */
-  pub rule var() -> Expr = name: id()
+  pub rule var() -> Expr = name:id()
   {
     Expr::Id(name)
   }
 
-  rule digit() -> String = d:$(['0'..= '9']) {d.parse().unwrap()}
-  rule negative() -> String = n:$(['-']) {n.parse().unwrap()}
-  rule floating() -> String = f:$(['.']) {f.parse().unwrap()}
+  rule digit() -> String = d:$(['0'..='9']) { d.parse().unwrap() }
 
   /* Parse a single literal number.
     Staff solution length: 6 lines */
-pub rule numeral() -> Expr
-    = n:$(negative()? digit()) {
-        Expr::Numeral(n.parse().unwrap())
-    }
+       pub rule numeral() -> Expr
+            = n:$(("-"? digit()+ ("." digit()+)?))
+        {
+            Expr::Numeral(n.parse().unwrap())
+        }
 
   /* Implement a parser for (all the) expressions. You should define
      and call your own helpers. See the precedence-climbing approach
      from the book and lecture to help decide on your helpers.
      Both expr() and decl() will call each other.
      Staff solution length: 10 lines, including 7 helpers */
-  pub rule expr() -> Expr = unimplemented_expr()
+  // Helper rule for unary operators (Op2).
+        rule op2() -> Expr
+            = a:atom() "*" b:op2() {
+                Expr::Times(Box::new(a), Box::new(b))
+            }
+            / a:atom() {
+                a
+            }
+
+        // Helper rule for binary addition and subtraction (Op1).
+        rule op1() -> Expr
+            = a:op2() "+" b:op1() {
+                Expr::Plus(Box::new(a), Box::new(b))
+            }
+            / a:op2() "-" b:op1() {
+                Expr::Minus(Box::new(a), Box::new(b))
+            }
+            / a:op2() {
+                a
+            }
+
+        // Helper rule for let expressions and Op1.
+        rule expr_inner() -> Expr
+            = "let" d:decl() "in" e:expr() {
+                Expr::Let(Box::new(d), Box::new(e))
+            }
+            / o:op1() {
+                o
+            }
+
+        // Parse an expression.
+        pub rule expr() -> Expr = e:expr_inner() {
+            e
+        }
 
   /* Implement a parser for (all the) declarations.
      You are allowed to define and call your own helpers if you prefer.
@@ -171,5 +203,34 @@ pub rule numeral() -> Expr
      could be longer, with different numbers of helpers for each.
      ) */
   pub rule decl() -> Decl = unimplemented_decl()
+
+   // Helper rule to parse a non-empty argument list.
+        rule non_empty_arg_list() -> Vec<Expr>
+            = first:expr() "," rest:non_empty_arg_list() {
+                let mut args = vec![first];
+                args.extend(rest);
+                args
+            }
+            / first:expr() {
+                vec![first]
+            }
+
+        // Parse a function call.
+        rule fun_call() -> Expr
+            = name:id() "(" args:non_empty_arg_list() ")" {
+                Expr::FunCall(name, args)
+            }
+
+  // Parse an atom (Numeral, variable, or function call).
+        rule atom() -> Expr
+            = n:numeral() {
+                n
+            }
+            / v:var() {
+                v
+            }
+            / f:fun_call() {
+                f
+            }
   }
 }
