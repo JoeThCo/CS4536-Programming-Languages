@@ -160,7 +160,7 @@ peg::parser! {
      from the book and lecture to help decide on your helpers.
      Both expr() and decl() will call each other.
      Staff solution length: 10 lines, including 7 helpers */
-  // Helper rule for unary operators (Op2).
+    //unary operators
         rule op2() -> Expr
             = a:atom() "*" b:op2() {
                 Expr::Times(Box::new(a), Box::new(b))
@@ -169,7 +169,7 @@ peg::parser! {
                 a
             }
 
-        // Helper rule for binary addition and subtraction (Op1).
+        //binary addition and subtraction
         rule op1() -> Expr
             = a:op2() "+" b:op1() {
                 Expr::Plus(Box::new(a), Box::new(b))
@@ -181,7 +181,7 @@ peg::parser! {
                 a
             }
 
-        // Helper rule for let expressions and Op1.
+        //let expressions and Op1.
         rule expr_inner() -> Expr
             = "let" d:decl() "in" e:expr() {
                 Expr::Let(Box::new(d), Box::new(e))
