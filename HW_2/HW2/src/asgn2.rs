@@ -145,20 +145,16 @@ peg::parser! {
     Expr::Id(name)
   }
 
-  /*Rule that gets everything LEFT of potental decimal place */
-rule GetInt() -> String
-= i:$("-"? ['0'..='9']){
-    i.parse().unwrap()
-}
-
-rule GetDecimal() -> String
-=d:$("."?){d.parse().unwrap()}
-
+  rule digit() -> String = d:$(['0'..= '9']) {d.parse().unwrap()}
+  rule negative() -> String = n:$(['-']) {n.parse().unwrap()}
+  rule floating() -> String = f:$(['.']) {f.parse().unwrap()}
 
   /* Parse a single literal number.
     Staff solution length: 6 lines */
 pub rule numeral() -> Expr
-= e:GetInt() { Expr::Numeral(e.parse().unwrap()) }
+    = n:$(negative()? digit()) {
+        Expr::Numeral(n.parse().unwrap())
+    }
 
   /* Implement a parser for (all the) expressions. You should define
      and call your own helpers. See the precedence-climbing approach
