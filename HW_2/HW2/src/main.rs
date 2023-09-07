@@ -17,7 +17,7 @@ fn test_numeral(score: f64, input: String, out: Option<f64>) -> f64 {
         (Err(_), None) => return score,
         (Ok(f), None) => {
             println!(
-                "Expression test case expected not to parse {} but got: {}",
+                "Expression test case expected not to parse [{}] but got: [{}]",
                 input,
                 asgn2::expr_to_string(f)
             );
@@ -25,7 +25,7 @@ fn test_numeral(score: f64, input: String, out: Option<f64>) -> f64 {
         }
         (Err(_), Some(f)) => {
             println!(
-                "Expression test case did not parse {} but expected {}",
+                "Expression test case did not parse [{}] but expected [{}]",
                 input, f
             );
             return 0.0;
@@ -40,7 +40,7 @@ fn test_id(score: f64, input: String, out: Option<String>) -> f64 {
                 return score;
             } else {
                 println!(
-                    "Expression test case {} expected id {} but got {}",
+                    "Expression test case [{}] expected id [{}] but got [{}]",
                     input, s2, s1
                 );
                 return 0.0;
@@ -49,14 +49,14 @@ fn test_id(score: f64, input: String, out: Option<String>) -> f64 {
         (Err(_), None) => return score,
         (Ok(f), None) => {
             println!(
-                "Expression test case {} expected not to parse but got {}",
+                "Expression test case [{}] expected not to parse but got [{}]",
                 input, f
             );
             return 0.0;
         }
         (Err(_), Some(f)) => {
             println!(
-                "Expression test case {} expected {} but did not parse",
+                "Expression test case [{}] expected [{}] but did not parse",
                 input, f
             );
             return 0.0;
@@ -70,7 +70,7 @@ fn test_expr(score: f64, input: String, out: Option<asgn2::Expr>) -> f64 {
                 return score;
             } else {
                 println!(
-                    "Expression test case {} expected expr {} but got {}",
+                    "Expression test case [{}] expected expr [{}] but got [{}]",
                     input,
                     expr_to_string(e2),
                     expr_to_string(e1)
@@ -81,7 +81,7 @@ fn test_expr(score: f64, input: String, out: Option<asgn2::Expr>) -> f64 {
         (Err(_), None) => return score,
         (Ok(f), None) => {
             println!(
-                "Expression test case {} expected not to parse but got {}",
+                "Expression test case [{}] expected not to parse but got [{}]",
                 input,
                 expr_to_string(f)
             );
@@ -89,7 +89,7 @@ fn test_expr(score: f64, input: String, out: Option<asgn2::Expr>) -> f64 {
         }
         (Err(_), Some(f)) => {
             println!(
-                "Expression test case {} expected {} but did not parse",
+                "Expression test case [{}] expected [{}] but did not parse",
                 input,
                 expr_to_string(f)
             );
@@ -104,7 +104,7 @@ fn test_decl(score: f64, input: String, out: Option<asgn2::Decl>) -> f64 {
                 return score;
             } else {
                 println!(
-                    "Declaration test case {} expected decl {} but got {}",
+                    "Declaration test case [{}] expected decl [{}] but got [{}]",
                     input,
                     decl_to_string(d2),
                     decl_to_string(d1)
@@ -115,7 +115,7 @@ fn test_decl(score: f64, input: String, out: Option<asgn2::Decl>) -> f64 {
         (Err(_), None) => return score,
         (Ok(d), None) => {
             println!(
-                "Declaration test case {} expected not to parse but got {}",
+                "Declaration test case [{}] expected not to parse but got [{}]",
                 input,
                 decl_to_string(d)
             );
@@ -123,7 +123,7 @@ fn test_decl(score: f64, input: String, out: Option<asgn2::Decl>) -> f64 {
         }
         (Err(_), Some(d)) => {
             println!(
-                "Declaration test case {} expected {} but did not parse",
+                "Declaration test case [{}] expected [{}] but did not parse",
                 input,
                 decl_to_string(d)
             );
@@ -146,12 +146,6 @@ pub fn main() {
     let r10 = test_id(1.0, "-29".to_string(), None);
     let r_id = r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10;
 
-    if r_id == 10.0 {
-        println!("\nID Tests Passed!\n");
-    } else {
-        println!("\nID Score: {}\n", r_id);
-    }
-
     //numeral 10
     let r11 = test_numeral(1.0, "3".to_string(), Some(3.));
     let r12 = test_numeral(1.0, "-3".to_string(), Some(-3.));
@@ -164,12 +158,6 @@ pub fn main() {
     let r19 = test_numeral(1.0, "-9.".to_string(), None);
     let r20 = test_numeral(1.0, "9.".to_string(), None);
     let r_num = r11 + r12 + r13 + r14 + r15 + r16 + r17 + r18 + r19 + r20;
-
-    if r_num == 10.0 {
-        println!("\nNumerical Tests Passed!\n");
-    } else {
-        println!("\nNumerical Score: {}\n", r_num);
-    }
 
     //expr 35
     let r21 = test_expr(3.0, "xyzzy".to_string(), Some(ex::Id("xyzzy".to_string())));
@@ -253,6 +241,7 @@ pub fn main() {
     let r32 = test_expr(2.0, "--1".to_string(), None);
     let r_expr = r21 + r22 + r23 + r24 + r25 + r26 + r27 + r28 + r29 + r30 + r31 + r32;
 
+    //decl 20
     let r33 = test_expr(
         2.0,
         "let var x = y in x".to_string(),
@@ -367,12 +356,10 @@ pub fn main() {
     );
     let r_decl = r33 + r34a + r34b + r35 + r36 + r37 + r38 + r39;
 
-    if r_decl == 35.0 {
-        println!("\nExpressions Passed!\n")
-    } else {
-        println!("\nExpressions Score: {}\n", r_decl);
-    }
-
     let r = r_id + r_num + r_expr + r_decl;
+    println!(
+        "\nID:{} + Num:{} + Expr:{} + Decl:{}",
+        r_id, r_num, r_expr, r_decl
+    );
     gradelib::gradelib::record_grade(r);
 }

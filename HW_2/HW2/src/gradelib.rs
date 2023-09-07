@@ -4,7 +4,7 @@ pub mod gradelib {
     use std::path::Path;
 
     pub fn grade_str(g: f64) -> String {
-        println!("\n\n\nScore: {} / 75\n\n\n", g);
+        print!("= {} / 75\n", g);
         format!("{{\"score\": {},\"output\":\"Grader ran successfully\",\"stdout_visibility\":\"visible\"}}", g)
     }
 
@@ -16,7 +16,7 @@ pub mod gradelib {
         };
         match file.write_all(grade_str(g).as_bytes()) {
             Err(_why) => panic!("couldn't write file"),
-            Ok(_) => println!("wrote json file"),
+            Ok(_) => println!("\nwrote json file"),
         }
     }
 }

@@ -202,7 +202,16 @@ peg::parser! {
      Depending on your approach, your "expr" could be shorter and your "decl"
      could be longer, with different numbers of helpers for each.
      ) */
-  pub rule decl() -> Decl = unimplemented_decl()
+  pub rule decl() -> Decl = d:(
+            "var" name:id() "=" e:expr() {
+                Decl::VarDecl(name, Box::new(e))
+            }
+            / "function" name:id() "(" args:non_empty_arg_list_as_strings() ")" "{" body:expr() "}" {
+                Decl::FunDecl(name, args, Box::new(body))
+            }
+        ) {
+            d
+        }
 
    // Helper rule to parse a non-empty argument list.
         rule non_empty_arg_list() -> Vec<Expr>
@@ -212,6 +221,16 @@ peg::parser! {
                 args
             }
             / first:expr() {
+                vec![first]
+            }
+
+        rule non_empty_arg_list_as_strings() -> Vec<String>
+            = first:id() "," rest:non_empty_arg_list_as_strings() {
+                let mut args = vec![first];
+                args.extend(rest);
+                args
+            }
+            / first:id() {
                 vec![first]
             }
 
