@@ -191,9 +191,16 @@ peg::parser! {
             }
 
         // Parse an expression.
-        pub rule expr() -> Expr = e:expr_inner() {
-            e
-        }
+       pub rule expr() -> Expr
+    = "let " d:decl() " in " e:expr() {
+        Expr::Let(Box::new(d), Box::new(e))
+    }
+    / e:op1() {
+        e
+    }
+    / "(" e:expr() ")" {
+        e
+    }
 
   /* Implement a parser for (all the) declarations.
      You are allowed to define and call your own helpers if you prefer.

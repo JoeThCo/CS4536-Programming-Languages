@@ -70,7 +70,7 @@ fn test_expr(score: f64, input: String, out: Option<asgn2::Expr>) -> f64 {
                 return score;
             } else {
                 println!(
-                    "Expression test case [{}] expected expr [{}] but got [{}]",
+                    "Expression test case {} expected expr {} but got {}",
                     input,
                     expr_to_string(e2),
                     expr_to_string(e1)
@@ -81,7 +81,7 @@ fn test_expr(score: f64, input: String, out: Option<asgn2::Expr>) -> f64 {
         (Err(_), None) => return score,
         (Ok(f), None) => {
             println!(
-                "Expression test case [{}] expected not to parse but got [{}]",
+                "Expression test case {} expected not to parse but got {}",
                 input,
                 expr_to_string(f)
             );
@@ -89,7 +89,7 @@ fn test_expr(score: f64, input: String, out: Option<asgn2::Expr>) -> f64 {
         }
         (Err(_), Some(f)) => {
             println!(
-                "Expression test case [{}] expected [{}] but did not parse",
+                "Expression test case {} expected {} but did not parse",
                 input,
                 expr_to_string(f)
             );
