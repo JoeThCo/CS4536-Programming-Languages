@@ -129,9 +129,6 @@ peg::parser! {
   /* YOUR CODE: */
   /* Parse a single identifier (i.e., variable name)
      Staff solution length: 2 lines */
-     //Length: Two
-     //First: a-z or A-Z
-     //Second: a-z or A-Z or 0 - 9 or "_"
     pub rule id() -> String = s:$(['a'..='z' | 'A'..='Z'] ['a'..='z' | 'A'..='Z' | '0'..='9' | '_']*)
     {
         s.to_string()
@@ -140,10 +137,10 @@ peg::parser! {
  /* Parse a single variable. The cleanest solution uses id() as a helper.
     var() behaves just like id(), except with a different return type.
     Staff solution length: 1 lines */
-  pub rule var() -> Expr = name:id()
-  {
-    Expr::Id(name)
-  }
+    pub rule var() -> Expr = name:id()
+    {
+        Expr::Id(name)
+    }
 
   rule digit() -> String = d:$(['0'..='9']) { d.parse().unwrap() }
 
@@ -160,47 +157,43 @@ peg::parser! {
      from the book and lecture to help decide on your helpers.
      Both expr() and decl() will call each other.
      Staff solution length: 10 lines, including 7 helpers */
-    //unary operators
-        rule op2() -> Expr
-            = a:atom() "*" b:op2() {
-                Expr::Times(Box::new(a), Box::new(b))
-            }
-            / a:atom() {
-                a
-            }
+    pub rule expr() -> Expr
+        = "let " d:decl() " in " e:expr() {
+            Expr::Let(Box::new(d), Box::new(e))
+        }
+        / e:op1() {
+            e
+        }
+        / "(" e:expr() ")" {
+            e
+        }
 
-        //binary addition and subtraction
-        rule op1() -> Expr
-            = a:op2() "+" b:op1() {
-                Expr::Plus(Box::new(a), Box::new(b))
-            }
-            / a:op2() "-" b:op1() {
-                Expr::Minus(Box::new(a), Box::new(b))
-            }
-            / a:op2() {
-                a
-            }
+    rule op2() -> Expr
+        = a:atom() "*" b:op2() {
+            Expr::Times(Box::new(a), Box::new(b))
+        }
+        / a:atom() {
+            a
+        }
 
-        //let expressions and Op1.
-        rule expr_inner() -> Expr
-            = "let" d:decl() "in" e:expr() {
-                Expr::Let(Box::new(d), Box::new(e))
-            }
-            / o:op1() {
-                o
-            }
+    rule op1() -> Expr
+        = a:op2() "+" b:op1() {
+            Expr::Plus(Box::new(a), Box::new(b))
+        }
+        / a:op2() "-" b:op1() {
+            Expr::Minus(Box::new(a), Box::new(b))
+        }
+        / a:op2() {
+            a
+        }
 
-        // Parse an expression.
-       pub rule expr() -> Expr
-    = "let " d:decl() " in " e:expr() {
-        Expr::Let(Box::new(d), Box::new(e))
-    }
-    / e:op1() {
-        e
-    }
-    / "(" e:expr() ")" {
-        e
-    }
+    rule expr_inner() -> Expr
+        = "let" d:decl() "in" e:expr() {
+            Expr::Let(Box::new(d), Box::new(e))
+        }
+        / o:op1() {
+            o
+        }
 
   /* Implement a parser for (all the) declarations.
      You are allowed to define and call your own helpers if you prefer.
@@ -223,43 +216,40 @@ pub rule decl() -> Decl
         Decl::VarDecl(temp_name, Box::new(e))
     }
 
-   // Helper rule to parse a non-empty argument list.
-        rule non_empty_arg_list() -> Vec<Expr>
-            = first:expr() "," rest:non_empty_arg_list() {
-                let mut args = vec![first];
-                args.extend(rest);
-                args
-            }
-            / first:expr() {
-                vec![first]
-            }
+    rule non_empty_arg_list() -> Vec<Expr>
+        = first:expr() "," rest:non_empty_arg_list() {
+            let mut args = vec![first];
+            args.extend(rest);
+            args
+        }
+        / first:expr() {
+            vec![first]
+        }
 
         rule non_empty_arg_list_as_strings() -> Vec<String>
             = first:id() "," rest:non_empty_arg_list_as_strings() {
                 let mut args = vec![first];
                 args.extend(rest);
                 args
-            }
-            / first:id() {
-                vec![first]
-            }
+        }
+        / first:id() {
+            vec![first]
+        }
 
-        // Parse a function call.
         rule fun_call() -> Expr
             = name:id() "(" args:non_empty_arg_list() ")" {
                 Expr::FunCall(name, args)
-            }
+        }
 
-  // Parse an atom (Numeral, variable, or function call).
         rule atom() -> Expr
             = n:numeral() {
-                n
-            }
-            / v:var() {
-                v
-            }
-            / f:fun_call() {
-                f
-            }
+            n
+        }
+        / v:var() {
+            v
+        }
+        / f:fun_call() {
+            f
+        }
   }
 }
