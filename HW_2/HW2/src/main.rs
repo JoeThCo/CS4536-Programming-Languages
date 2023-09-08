@@ -10,7 +10,7 @@ fn test_numeral(score: f64, input: String, out: Option<f64>) -> f64 {
             if asgn2::expr_eq(f1, asgn2::Expr::Numeral(f2)) {
                 return score;
             } else {
-                println!("bad");
+                println!("Bad");
                 return 0.0;
             }
         }

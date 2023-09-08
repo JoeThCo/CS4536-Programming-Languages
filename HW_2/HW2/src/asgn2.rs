@@ -122,9 +122,9 @@ need to be the same length as ours, nor use the same number of helpers. */
 peg::parser! {
   pub grammar parser() for str {
   /* Provided helper functions to make the starter code type-check */
-  pub rule unimplemented_string() -> String = empty:$("") {? Ok(empty.to_string())}
-  pub rule unimplemented_expr() -> Expr = empty:$("") {? Ok(Expr::Numeral(383962395862.0)) }
-  pub rule unimplemented_decl() -> Decl = empty:$("") {? Ok(Decl::VarDecl("x".to_string(), Box::new(Expr::Numeral(893.923))))}
+  //pub rule unimplemented_string() -> String = empty:$("") {? Ok(empty.to_string())}
+  //pub rule unimplemented_expr() -> Expr = empty:$("") {? Ok(Expr::Numeral(383962395862.0)) }
+  //pub rule unimplemented_decl() -> Decl = empty:$("") {? Ok(Decl::VarDecl("x".to_string(), Box::new(Expr::Numeral(893.923))))}
 
   /* YOUR CODE: */
   /* Parse a single identifier (i.e., variable name)
@@ -202,16 +202,19 @@ peg::parser! {
      Depending on your approach, your "expr" could be shorter and your "decl"
      could be longer, with different numbers of helpers for each.
      ) */
-  pub rule decl() -> Decl = d:(
-            "var" name:id() "=" e:expr() {
-                Decl::VarDecl(name, Box::new(e))
-            }
-            / "function" name:id() "(" args:non_empty_arg_list_as_strings() ")" "{" body:expr() "}" {
-                Decl::FunDecl(name, args, Box::new(body))
-            }
-        ) {
-            d
-        }
+pub rule decl() -> Decl
+    = "var " name:id() " = " e:expr() {
+        Decl::VarDecl(name, Box::new(e))
+    }
+    / "function " name:id() "(" args:non_empty_arg_list_as_strings() ")" "{" body:expr() "}" {
+        Decl::FunDecl(name, args, Box::new(body))
+    }
+    / "let " d:decl() " in " e:expr() {
+        // Handle let declarations by creating a temporary VarDecl
+        // and using it in the let expression.
+        let temp_name = String::from("temp"); // You can choose any temporary name here
+        Decl::VarDecl(temp_name, Box::new(e))
+    }
 
    // Helper rule to parse a non-empty argument list.
         rule non_empty_arg_list() -> Vec<Expr>
