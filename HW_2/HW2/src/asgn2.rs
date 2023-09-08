@@ -147,8 +147,7 @@ peg::parser! {
   /* Parse a single literal number.
     Staff solution length: 6 lines */
        pub rule numeral() -> Expr
-            = n:$(("-"? digit()+ ("." digit()+)?))
-        {
+            = n:$((['-']? digit()+ ("." digit()+)?)) {
             Expr::Numeral(n.parse().unwrap())
         }
 
@@ -158,15 +157,36 @@ peg::parser! {
      Both expr() and decl() will call each other.
      Staff solution length: 10 lines, including 7 helpers */
     pub rule expr() -> Expr
-        = "let " d:decl() " in " e:expr() {
-            Expr::Let(Box::new(d), Box::new(e))
-        }
-        / e:op1() {
-            e
-        }
-        / "(" e:expr() ")" {
-            e
-        }
+    = "let " d:decl() " in " e:expr() {
+        Expr::Let(Box::new(d), Box::new(e))
+    }
+    / "function " name:id() "(" args:non_empty_arg_list_strings() ")" "{" body:expr() "}" {
+        let args_expr: Vec<Expr> = args.iter().map(|arg| Expr::Id(arg.clone())).collect();
+        let name_clone = name.clone();
+
+        Expr::Let(
+            Box::new(Decl::FunDecl(name, args, Box::new(body))),
+            Box::new(Expr::FunCall(name_clone, args_expr)),
+        )
+    }
+    / e:op1() {
+        e
+    }
+    / "(" e:expr() ")" {
+        e
+    }
+    / "let var " name:id() " = " e:expr() " in " e2:expr() {
+        Expr::Let(
+            Box::new(Decl::VarDecl(name.clone(), Box::new(e))),
+            Box::new(e2),
+        )
+    }
+    / "let var " name:id() " = " e:expr() {
+        Expr::Let(
+            Box::new(Decl::VarDecl(name.clone(), Box::new(e))),
+            Box::new(Expr::Id(name.clone())),
+        )
+    }
 
     rule op2() -> Expr
         = a:atom() "*" b:op2() {
@@ -202,18 +222,16 @@ peg::parser! {
      Depending on your approach, your "expr" could be shorter and your "decl"
      could be longer, with different numbers of helpers for each.
      ) */
-pub rule decl() -> Decl
-    = "var " name:id() " = " e:expr() {
-        Decl::VarDecl(name, Box::new(e))
+    pub rule decl() -> Decl
+        = "var " name:id() " = " e:expr() {
+            Decl::VarDecl(name, Box::new(e))
     }
-    / "function " name:id() "(" args:non_empty_arg_list_as_strings() ")" "{" body:expr() "}" {
-        Decl::FunDecl(name, args, Box::new(body))
+    / "function " name:id() "(" args:non_empty_arg_list_strings() ")" "{" body:expr() "}" {
+            Decl::FunDecl(name, args, Box::new(body))
     }
     / "let " d:decl() " in " e:expr() {
-        // Handle let declarations by creating a temporary VarDecl
-        // and using it in the let expression.
-        let temp_name = String::from("temp"); // You can choose any temporary name here
-        Decl::VarDecl(temp_name, Box::new(e))
+            let temp_name = String::from("tempVar");
+            Decl::VarDecl(temp_name, Box::new(e))
     }
 
     rule non_empty_arg_list() -> Vec<Expr>
@@ -226,30 +244,30 @@ pub rule decl() -> Decl
             vec![first]
         }
 
-        rule non_empty_arg_list_as_strings() -> Vec<String>
-            = first:id() "," rest:non_empty_arg_list_as_strings() {
-                let mut args = vec![first];
-                args.extend(rest);
-                args
+    rule non_empty_arg_list_strings() -> Vec<String>
+        = first:id() "," rest:non_empty_arg_list_strings() {
+            let mut args = vec![first];
+            args.extend(rest);
+            args
         }
         / first:id() {
             vec![first]
         }
 
-        rule fun_call() -> Expr
-            = name:id() "(" args:non_empty_arg_list() ")" {
-                Expr::FunCall(name, args)
+    rule function_call() -> Expr
+        = name:id() "(" args:non_empty_arg_list() ")" {
+            Expr::FunCall(name, args)
         }
 
-        rule atom() -> Expr
-            = n:numeral() {
+    rule atom() -> Expr
+        = n:numeral() {
             n
         }
         / v:var() {
             v
         }
-        / f:fun_call() {
+        / f:function_call() {
             f
-        }
+    }
   }
 }
