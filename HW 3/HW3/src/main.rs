@@ -119,6 +119,8 @@ fn main() {
     );
     let r_nofun = r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8;
 
+    println!("\n\n\nEnd of no Fun\n\n\n");
+
     let r9 = test_expr(
         5.0,
         ex::Let(
@@ -278,7 +280,7 @@ fn main() {
     let r_fun = r9 + r10 + r11 + r12 + r13 + r14 + r15;
 
     println!("\nNo Fun: {} / 40", r_nofun);
-    println!("Fun: {} / 35", r_nofun);
+    println!("Fun: {} / 35", r_fun);
 
     let score = r_nofun + r_fun;
     println!("Score: {} / 75\n", score);
