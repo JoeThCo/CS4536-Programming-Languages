@@ -28,6 +28,7 @@
  */
 use rpds::HashTrieMap;
 
+//Joe Colley 9/11/2023 - 9/15/2023
 /** BEGIN STARTER CODE  */
 /* The following definitions are provided to you. Take time to
  * read and understand them, because your code will build on them.
@@ -90,6 +91,7 @@ pub enum Defn {
 }
 
 /** Dummy code, so the starter code compiles */
+//TODO, be able to delete this
 fn unimplemented_expr() -> Value {
     Value::Numeral(0)
 }
@@ -101,14 +103,14 @@ pub fn eval_defn(env: &HashTrieMap<String, EnvRecord>, d: &Defn) -> HashTrieMap<
     match d {
         Defn::VarDefn(x, e) => {
             let value = eval_expr(env, e);
-            let new_env = env.clone(); // Clone the current environment
-            let _ = new_env.insert(x.clone(), EnvRecord::VarRecord(value)); // Update the environment
+            let new_env = env.clone();
+            let _ = new_env.insert(x.clone(), EnvRecord::VarRecord(value));
             new_env
         }
         Defn::FunDefn(f, params, body) => {
             let fun_record = EnvRecord::FunRecord(params.clone(), body.clone());
-            let new_env = env.clone(); // Clone the current environment
-            let _ = new_env.insert(f.clone(), fun_record); // Update the environment
+            let new_env = env.clone();
+            let _ = new_env.insert(f.clone(), fun_record);
             new_env
         }
     }
@@ -121,10 +123,12 @@ pub fn eval_expr(env: &HashTrieMap<String, EnvRecord>, e: &Expr) -> Value {
             // Lookup the identifier in the environment and return the corresponding value.
             match env.get(x) {
                 Some(EnvRecord::VarRecord(value)) => value.clone(),
-                _ => unimplemented_expr(), // Handle undefined variables
+                // Handle undefined variables, TODO
+                _ => unimplemented_expr(),
             }
         }
-        Expr::Numeral(n) => Value::Numeral(*n), // Literal numbers
+        // Literal numbers
+        Expr::Numeral(n) => Value::Numeral(*n),
         Expr::Times(e1, e2) => {
             let v1 = eval_expr(env, e1);
             let v2 = eval_expr(env, e2);
@@ -165,7 +169,8 @@ pub fn eval_expr(env: &HashTrieMap<String, EnvRecord>, e: &Expr) -> Value {
                     // Evaluate the function body with the new environment
                     eval_expr(&new_env, body)
                 }
-                _ => unimplemented_expr(), // Handle undefined functions
+                // Handle undefined functions, TODO
+                _ => unimplemented_expr(),
             }
         }
     }
