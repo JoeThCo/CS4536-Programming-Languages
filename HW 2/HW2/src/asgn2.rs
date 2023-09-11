@@ -1,4 +1,6 @@
 use peg::*;
+//Joe Colley 9/8/2023
+
 /* Implement a PEG parser for the following context-free grammar.
  *
  * Implement each terminal symbol according to its English specification
@@ -142,10 +144,12 @@ peg::parser! {
         Expr::Id(name)
     }
 
-  rule digit() -> String = d:$(['0'..='9']) { d.parse().unwrap() }
+    //get all digits 0 -9
+    rule digit() -> String = d:$(['0'..='9']) { d.parse().unwrap() }
 
   /* Parse a single literal number.
     Staff solution length: 6 lines */
+    //couldnt figure out two niche cases but I gave it my best
        pub rule numeral() -> Expr
             = n:$((['-']? digit()+ ("." digit()+)?)) {
             Expr::Numeral(n.parse().unwrap())
@@ -188,6 +192,7 @@ peg::parser! {
         )
     }
 
+    // *
     rule op2() -> Expr
         = a:atom() "*" b:op2() {
             Expr::Times(Box::new(a), Box::new(b))
@@ -196,6 +201,7 @@ peg::parser! {
             a
         }
 
+    //+ and -
     rule op1() -> Expr
         = a:op2() "+" b:op1() {
             Expr::Plus(Box::new(a), Box::new(b))
@@ -233,7 +239,7 @@ peg::parser! {
             let temp_name = String::from("tempVar");
             Decl::VarDecl(temp_name, Box::new(e))
     }
-
+    //non empty for EXPR
     rule non_empty_arg_list() -> Vec<Expr>
         = first:expr() "," rest:non_empty_arg_list() {
             let mut args = vec![first];
@@ -244,6 +250,7 @@ peg::parser! {
             vec![first]
         }
 
+    //non empty for STRINGs
     rule non_empty_arg_list_strings() -> Vec<String>
         = first:id() "," rest:non_empty_arg_list_strings() {
             let mut args = vec![first];
