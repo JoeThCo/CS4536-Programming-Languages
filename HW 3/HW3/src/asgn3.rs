@@ -101,14 +101,14 @@ pub fn eval_defn(env: &HashTrieMap<String, EnvRecord>, d: &Defn) -> HashTrieMap<
     match d {
         Defn::VarDefn(x, e) => {
             let value = eval_expr(env, e);
-            let mut new_env = env.clone(); // Clone the current environment
-            new_env.insert(x.clone(), EnvRecord::VarRecord(value)); // Update the environment
+            let new_env = env.clone(); // Clone the current environment
+            let _ = new_env.insert(x.clone(), EnvRecord::VarRecord(value)); // Update the environment
             new_env
         }
         Defn::FunDefn(f, params, body) => {
             let fun_record = EnvRecord::FunRecord(params.clone(), body.clone());
-            let mut new_env = env.clone(); // Clone the current environment
-            new_env.insert(f.clone(), fun_record); // Update the environment
+            let new_env = env.clone(); // Clone the current environment
+            let _ = new_env.insert(f.clone(), fun_record); // Update the environment
             new_env
         }
     }
@@ -130,7 +130,6 @@ pub fn eval_expr(env: &HashTrieMap<String, EnvRecord>, e: &Expr) -> Value {
             let v2 = eval_expr(env, e2);
             match (v1, v2) {
                 (Value::Numeral(n1), Value::Numeral(n2)) => Value::Numeral(n1 * n2),
-                _ => unimplemented_expr(), // Handle non-numeric values
             }
         }
         Expr::Plus(e1, e2) => {
@@ -138,7 +137,6 @@ pub fn eval_expr(env: &HashTrieMap<String, EnvRecord>, e: &Expr) -> Value {
             let v2 = eval_expr(env, e2);
             match (v1, v2) {
                 (Value::Numeral(n1), Value::Numeral(n2)) => Value::Numeral(n1 + n2),
-                _ => unimplemented_expr(), // Handle non-numeric values
             }
         }
         Expr::Minus(e1, e2) => {
@@ -146,7 +144,6 @@ pub fn eval_expr(env: &HashTrieMap<String, EnvRecord>, e: &Expr) -> Value {
             let v2 = eval_expr(env, e2);
             match (v1, v2) {
                 (Value::Numeral(n1), Value::Numeral(n2)) => Value::Numeral(n1 - n2),
-                _ => unimplemented_expr(), // Handle non-numeric values
             }
         }
         Expr::Let(defn, body) => {
@@ -160,9 +157,10 @@ pub fn eval_expr(env: &HashTrieMap<String, EnvRecord>, e: &Expr) -> Value {
             match env.get(f) {
                 Some(EnvRecord::FunRecord(params, body)) => {
                     // Create a new environment with parameter bindings
-                    let mut new_env = env.clone();
+                    let new_env = env.clone();
                     for (param, arg) in params.iter().zip(args.iter()) {
-                        new_env.insert(param.clone(), EnvRecord::VarRecord(eval_expr(env, arg)));
+                        let _ = new_env
+                            .insert(param.clone(), EnvRecord::VarRecord(eval_expr(env, arg)));
                     }
                     // Evaluate the function body with the new environment
                     eval_expr(&new_env, body)
