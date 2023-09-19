@@ -118,7 +118,6 @@ fn main() {
         HashTrieMap::new().insert("z".to_string(), EnvRecord::VarRecord(val::Numeral(4))),
     );
     let r_nofun = r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8;
-    println!("\n\n\nEnd of test_defn\n\n\n");
 
     let r9 = test_expr(
         5.0,

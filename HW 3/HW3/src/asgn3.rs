@@ -90,28 +90,17 @@ pub enum Defn {
     FunDefn(String, Vec<String>, Box<Expr>),
 }
 
-/** Dummy code, so the starter code compiles */
-//TODO, be able to delete this
-fn unimplemented_expr() -> Value {
-    Value::Numeral(0)
-}
-/** END STARTER CODE  
- *  You write the rest */
-
 /** Staff solution length: 11 lines */
 pub fn eval_defn(env: &HashTrieMap<String, EnvRecord>, d: &Defn) -> HashTrieMap<String, EnvRecord> {
     match d {
+        // Evaluate var def by evaluating its expression and put variable with its value in the environment
         Defn::VarDefn(x, e) => {
-            let value = eval_expr(env, e);
-            let new_env = env.clone();
-            let _ = new_env.insert(x.clone(), EnvRecord::VarRecord(value));
-            new_env
+            let value = eval_expr(&env, &e);
+            env.insert(x.clone(), EnvRecord::VarRecord(value))
         }
-        Defn::FunDefn(f, params, body) => {
-            let fun_record = EnvRecord::FunRecord(params.clone(), body.clone());
-            let new_env = env.clone();
-            let _ = new_env.insert(f.clone(), fun_record);
-            new_env
+        // Put the function name with its arguments and body in the environment
+        Defn::FunDefn(f, args, e) => {
+            env.insert(f.clone(), EnvRecord::FunRecord(args.clone(), e.clone()))
         }
     }
 }
@@ -119,58 +108,50 @@ pub fn eval_defn(env: &HashTrieMap<String, EnvRecord>, d: &Defn) -> HashTrieMap<
 /* Staff solution length: 55 lines, 27 of which are for function calls */
 pub fn eval_expr(env: &HashTrieMap<String, EnvRecord>, e: &Expr) -> Value {
     match e {
+        // Get the value associated with an identifier
         Expr::Id(x) => {
-            // Lookup the identifier in the environment and return the corresponding value.
-            match env.get(x) {
-                Some(EnvRecord::VarRecord(value)) => value.clone(),
-                // Handle undefined variables, TODO
-                _ => unimplemented_expr(),
+            if let Some(EnvRecord::VarRecord(val)) = env.get(x) {
+                val.clone()
+            } else {
+                panic!("Unbound identifier: {}", x);
             }
         }
-        // Literal numbers
+
+        //Return numeral value
         Expr::Numeral(n) => Value::Numeral(*n),
-        Expr::Times(e1, e2) => {
-            let v1 = eval_expr(env, e1);
-            let v2 = eval_expr(env, e2);
-            match (v1, v2) {
-                (Value::Numeral(n1), Value::Numeral(n2)) => Value::Numeral(n1 * n2),
-            }
+
+        //Evaluate the operands and then do the operation.
+        Expr::Times(e1, e2) => match (eval_expr(&env, &e1), eval_expr(&env, &e2)) {
+            (Value::Numeral(v1), Value::Numeral(v2)) => Value::Numeral(v1 * v2),
+        },
+        Expr::Plus(e1, e2) => match (eval_expr(&env, &e1), eval_expr(&env, &e2)) {
+            (Value::Numeral(v1), Value::Numeral(v2)) => Value::Numeral(v1 + v2),
+        },
+        Expr::Minus(e1, e2) => match (eval_expr(&env, &e1), eval_expr(&env, &e2)) {
+            (Value::Numeral(v1), Value::Numeral(v2)) => Value::Numeral(v1 - v2),
+        },
+
+        //Evaluate the definition and then the expression in the new environment
+        Expr::Let(d, e2) => {
+            let new_env = eval_defn(&env, &d);
+            eval_expr(&new_env, &e2)
         }
-        Expr::Plus(e1, e2) => {
-            let v1 = eval_expr(env, e1);
-            let v2 = eval_expr(env, e2);
-            match (v1, v2) {
-                (Value::Numeral(n1), Value::Numeral(n2)) => Value::Numeral(n1 + n2),
-            }
-        }
-        Expr::Minus(e1, e2) => {
-            let v1 = eval_expr(env, e1);
-            let v2 = eval_expr(env, e2);
-            match (v1, v2) {
-                (Value::Numeral(n1), Value::Numeral(n2)) => Value::Numeral(n1 - n2),
-            }
-        }
-        Expr::Let(defn, body) => {
-            // Evaluate the definition and update the environment
-            let new_env = eval_defn(env, defn);
-            // Evaluate the body with the updated environment
-            eval_expr(&new_env, body)
-        }
+
+        //Fetch the function's definition, update the environment with the new actual arguments,
+        //then evaluate the function body in the new environment
         Expr::Call(f, args) => {
-            // Lookup the function in the environment
-            match env.get(f) {
-                Some(EnvRecord::FunRecord(params, body)) => {
-                    // Create a new environment with parameter bindings
-                    let new_env = env.clone();
-                    for (param, arg) in params.iter().zip(args.iter()) {
-                        let _ = new_env
-                            .insert(param.clone(), EnvRecord::VarRecord(eval_expr(env, arg)));
-                    }
-                    // Evaluate the function body with the new environment
-                    eval_expr(&new_env, body)
+            if let Some(EnvRecord::FunRecord(arg_names, body)) = env.get(f) {
+                if arg_names.len() != args.len() {
+                    panic!("Function argument mismatch for {}", f);
                 }
-                // Handle undefined functions, TODO
-                _ => unimplemented_expr(),
+                let mut new_env = env.clone();
+                for (name, expr) in arg_names.iter().zip(args.iter()) {
+                    let value = eval_expr(&env, &expr);
+                    new_env = new_env.insert(name.clone(), EnvRecord::VarRecord(value));
+                }
+                eval_expr(&new_env, &body)
+            } else {
+                panic!("Undefined function: {}", f);
             }
         }
     }
