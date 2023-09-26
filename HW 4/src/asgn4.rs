@@ -122,7 +122,38 @@ pub enum Defn {
  *   type_check_defn(Γ, d) = Some(Γ'). If not, type_check_defn(Γ,d) = None */
 /* Staff solution length: 28 lines */
 pub fn type_check_defn(con: &HashTrieMap<String, Type>, d: &Defn) -> Option<(String, Type)> {
-    None /* Dummy implementation so it compiles */
+    match d {
+        Defn::VarDefn(id, expr) => {
+            if let Some(e_type) = type_check_expr(con, expr) {
+                Some((id.clone(), e_type))
+            } else {
+                None
+            }
+        }
+
+        Defn::FunDefn(id, params, ret_type, body) => {
+            let updated_context = con.clone();
+            for (param_id, param_type) in params {
+                let _ = updated_context.insert(param_id.clone(), param_type.clone());
+            }
+
+            if let Some(body_type) = type_check_expr(&updated_context, body) {
+                if &body_type == ret_type {
+                    Some((
+                        id.clone(),
+                        Type::Function(
+                            params.iter().map(|(_, t)| t.clone()).collect(),
+                            Box::new(ret_type.clone()),
+                        ),
+                    ))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        }
+    }
 }
 
 /* Implement type-checking for expressions.
@@ -171,12 +202,13 @@ pub fn type_check_expr(con: &HashTrieMap<String, Type>, e: &Expr) -> Option<Type
         //if we could, make a type
         //else, None
         Expr::Let(defn, expr) => {
-            if let Some((id, d_type)) = type_check_defn(con, defn) {
-                let updated_context = con.clone();
-                let _ = updated_context.insert(id, d_type);
-                type_check_expr(&updated_context, expr)
-            } else {
-                None
+            let updated_context = con.clone();
+            match type_check_defn(&updated_context, defn) {
+                Some((id, d_type)) => {
+                    let _ = updated_context.insert(id, d_type);
+                    type_check_expr(&updated_context, expr)
+                }
+                None => None,
             }
         }
 
