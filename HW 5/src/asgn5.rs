@@ -1,5 +1,6 @@
 /** In this assignment, you represent and analyze data
  * from the System Usability Scale (SUS).
+ * Done by Joe Colley 9/29/23 - 10/10/23
  */
 /* BEGIN STARTER CODE */
 #[derive(PartialEq, Eq, Debug)]
@@ -61,7 +62,11 @@ pub fn index_to_prompt(i: i32) -> Option<String> {
  * (return -1). Outside the range 0..9, your function can do anything. */
 /** Staff solution length: 14 lines (though a 1-line solution exists) */
 pub fn index_to_key(i: i32) -> i32 {
-    0
+    match i {
+        0 | 2 | 4 | 6 | 8 => 1,
+        1 | 3 | 5 | 7 | 9 => -1,
+        _ => 0,
+    }
 }
 
 /** Assume data is a 10-element vector containing a complete set of responses
@@ -71,8 +76,9 @@ pub fn index_to_key(i: i32) -> i32 {
  */
 /** Staff solution length: 8 lines */
 pub fn acquiescence_bias(data: &Vec<Agreement>) -> f64 {
-    420.0
-} // return dummy value so it compiles
+    let sum: i32 = data.iter().map(|a| agreement_to_score(a)).sum();
+    sum as f64 / data.len() as f64
+}
 
 /** Assume data is a 10-element vector containing a complete set of responses
  * to the System Usability Scale. Compute the final score, i.e., scale value,
@@ -80,6 +86,8 @@ pub fn acquiescence_bias(data: &Vec<Agreement>) -> f64 {
  * agreement_to_score and index_to_key as helper functions.
  */
 /** Staff solution length: 9 lines */
+
+//have to wait as the lecutre hasnt happened yet
 pub fn score(data: &Vec<Agreement>) -> f64 {
     420.0
 } // return dummy value so it compiles
