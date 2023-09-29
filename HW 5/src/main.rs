@@ -178,5 +178,13 @@ fn main() {
     let rs_2 = test_real(5.0, asgn5::score(&responses_c), 1.0, "score");
     let r_score = rs_0 + rs_1 + rs_2;
     let grade = r_agreement + r_prompt + r_key + r_acquiesce + r_score;
+
+    println!("\nAgreement {} / 15", r_agreement);
+    println!("Prompt {} / 15", r_prompt);
+    println!("Index to Key {} / 15", r_key);
+    println!("Bias {} / 15", r_acquiesce);
+    println!("Score {} / 15", r_score);
+    println!("\nFinal Grade {} / 75", grade);
+
     gradelib::gradelib::record_grade(grade);
 }
