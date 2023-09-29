@@ -23,7 +23,13 @@ pub const SURVEY_LENGTH: i32 = 10;
 *  as in a standard Likert scale calculation */
 /** Staff solution length: 9 lines */
 pub fn agreement_to_score(a: &Agreement) -> i32 {
-    0
+    match a {
+        Agreement::StronglyDisagree => -2,
+        Agreement::SomewhatDisagree => -1,
+        Agreement::Neither => 0,
+        Agreement::SomewhatAgree => 1,
+        Agreement::StronglyAgree => 2,
+    }
 }
 
 /* For each index i in the range 0-9, return Some(txt) where txt is
@@ -35,7 +41,19 @@ pub fn agreement_to_score(a: &Agreement) -> i32 {
  */
 /** Staff solution length: 14 lines*/
 pub fn index_to_prompt(i: i32) -> Option<String> {
-    None
+    match i {
+        0 => Some("I think that I would like to use this system frequently.".to_string()),
+        1 => Some("I found the system unnecessarily complex.".to_string()),
+        2 => Some("I thought the system was easy to use.".to_string()),
+        3 => Some("I think that I would need the support of a technical person to be able to use this system.".to_string()),
+        4 => Some("I found the various functions in this system were well integrated.".to_string()),
+        5 => Some("I thought there was too much inconsistency in this system.".to_string()),
+        6 => Some("I would imagine that most people would learn to use this system very quickly.".to_string()),
+        7 => Some("I found the system very cumbersome to use.".to_string()),
+        8 => Some("I felt very confident using the system.".to_string()),
+        9 => Some("I needed to learn a lot of things before I could get going with this system.".to_string()),
+        _ => None,
+    }
 }
 
 /** For each index i 0..9, return an integer indicating whether question i of
