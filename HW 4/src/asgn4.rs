@@ -123,32 +123,34 @@ pub enum Defn {
 /* Staff solution length: 28 lines */
 pub fn type_check_defn(con: &HashTrieMap<String, Type>, d: &Defn) -> Option<(String, Type)> {
     match d {
-        Defn::VarDefn(id, expr) => {
-            if let Some(e_type) = type_check_expr(con, expr) {
-                Some((id.clone(), e_type))
+        //cehck by eval expressions
+        Defn::VarDefn(name, expr) => {
+            if let Some(t) = type_check_expr(con, expr) {
+                Some((name.clone(), t))
             } else {
                 None
             }
         }
 
-        Defn::FunDefn(id, params, ret_type, body) => {
-            let updated_context = con.clone();
-            for (param_id, param_type) in params {
-                let _ = updated_context.insert(param_id.clone(), param_type.clone());
+        //body is the same with declared type
+        Defn::FunDefn(name, args, ret_type, body) => {
+            let mut new_con = con.clone();
+
+            //adds the argument
+            for (arg_name, arg_type) in args {
+                new_con = new_con.insert(arg_name.clone(), arg_type.clone());
             }
 
-            if let Some(body_type) = type_check_expr(&updated_context, body) {
-                if &body_type == ret_type {
-                    Some((
-                        id.clone(),
-                        Type::Function(
-                            params.iter().map(|(_, t)| t.clone()).collect(),
-                            Box::new(ret_type.clone()),
-                        ),
-                    ))
-                } else {
-                    None
-                }
+            // Add recursive function type
+            let fun_type = Type::Function(
+                args.iter().map(|(_, t)| t.clone()).collect(),
+                Box::new(ret_type.clone()),
+            );
+            new_con = new_con.insert(name.clone(), fun_type.clone());
+
+            //needs to match
+            if type_check_expr(&new_con, body) == Some(ret_type.clone()) {
+                Some((name.clone(), fun_type))
             } else {
                 None
             }
@@ -166,7 +168,7 @@ pub fn type_check_defn(con: &HashTrieMap<String, Type>, d: &Defn) -> Option<(Str
 pub fn type_check_expr(con: &HashTrieMap<String, Type>, e: &Expr) -> Option<Type> {
     match e {
         //just make stuff the stuff
-        Expr::Id(id) => con.get(id).cloned(),
+        Expr::Id(name) => con.get(name).cloned(),
         Expr::Numeral(_) => Some(Type::Number),
         Expr::StringLiteral(_) => Some(Type::String),
 
@@ -177,20 +179,23 @@ pub fn type_check_expr(con: &HashTrieMap<String, Type>, e: &Expr) -> Option<Type
         //check left and right
         //if ==, make a type
         //else, None
-        Expr::Compare(left, _, right) => {
-            let l_type = type_check_expr(con, left)?;
-            let r_type = type_check_expr(con, right)?;
-            if l_type == r_type {
+
+        //bool result
+        Expr::Compare(e1, _, e2) => {
+            if type_check_expr(con, e1) == Some(Type::Number)
+                && type_check_expr(con, e2) == Some(Type::Number)
+            {
                 Some(Type::Boolean)
             } else {
                 None
             }
         }
 
-        Expr::Times(left, right) | Expr::Plus(left, right) | Expr::Minus(left, right) => {
-            let l_type = type_check_expr(con, left)?;
-            let r_type = type_check_expr(con, right)?;
-            if l_type == Type::Number && r_type == Type::Number {
+        //number result
+        Expr::Times(e1, e2) | Expr::Plus(e1, e2) | Expr::Minus(e1, e2) => {
+            if type_check_expr(con, e1) == Some(Type::Number)
+                && type_check_expr(con, e2) == Some(Type::Number)
+            {
                 Some(Type::Number)
             } else {
                 None
@@ -201,29 +206,31 @@ pub fn type_check_expr(con: &HashTrieMap<String, Type>, e: &Expr) -> Option<Type
         //type check defn
         //if we could, make a type
         //else, None
-        Expr::Let(defn, expr) => {
-            let updated_context = con.clone();
-            match type_check_defn(&updated_context, defn) {
-                Some((id, d_type)) => {
-                    let _ = updated_context.insert(id, d_type);
-                    type_check_expr(&updated_context, expr)
-                }
-                None => None,
+        Expr::Let(d, e) => {
+            if let Some((name, t)) = type_check_defn(con, d) {
+                let new_con = con.insert(name, t);
+                type_check_expr(&new_con, e)
+            } else {
+                None
             }
         }
 
-        Expr::Call(id, args) => {
-            if let Some(Type::Function(params, ret_type)) = con.get(id) {
-                if params.len() == args.len()
-                    && params
-                        .iter()
-                        .zip(args.iter())
-                        .all(|(p_type, arg)| type_check_expr(con, arg) == Some(p_type.clone()))
-                {
-                    Some(*ret_type.clone())
-                } else {
-                    None
+        //check for function exists
+        //arugments are good, match
+        //else None
+        Expr::Call(name, args) => {
+            if let Some(Type::Function(param_types, ret_type)) = con.get(name) {
+                if param_types.len() != args.len() {
+                    return None;
                 }
+
+                for (arg, expected_type) in args.iter().zip(param_types.iter()) {
+                    if type_check_expr(con, arg) != Some(expected_type.clone()) {
+                        return None;
+                    }
+                }
+
+                Some(*ret_type.clone())
             } else {
                 None
             }
