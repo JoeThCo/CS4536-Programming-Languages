@@ -86,8 +86,21 @@ pub fn acquiescence_bias(data: &Vec<Agreement>) -> f64 {
  * agreement_to_score and index_to_key as helper functions.
  */
 /** Staff solution length: 9 lines */
-
-//have to wait as the lecutre hasnt happened yet
 pub fn score(data: &Vec<Agreement>) -> f64 {
-    420.0
-} // return dummy value so it compiles
+    let total_questions = data.len() as f64;
+
+    let sum = data
+        .iter()
+        .enumerate()
+        .map(|(i, a)| {
+            let score = agreement_to_score(a);
+            if index_to_key(i as i32) == 1 {
+                score
+            } else {
+                -score
+            }
+        })
+        .sum::<i32>() as f64;
+
+    sum / total_questions
+}
